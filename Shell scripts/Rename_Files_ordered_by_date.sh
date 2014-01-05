@@ -1,0 +1,1 @@
+export counter=1;for i in $(ls -tr); do echo $i;echo $counter;mv $i "NewName_$counter.jpg";let counter=$counter+1;done;
