@@ -128,9 +128,6 @@ class ChatGUI(Frame):
         okButton = Button(frame, text="Panic Button", activebackground="red", command=self.sendFile) 
         okButton.pack(expand="no", fill=BOTH, side=TOP)
         
-        
-        #per gestire invio con la newline --> http://userpages.umbc.edu/~dhood2/courses/cmsc433/spring2010/?section=Notes&topic=Python&notes=93
-        
         self.usersFrame = Frame(self.parent)
         self.usersFrame.pack(fill=BOTH, expand=1, side=RIGHT)
         
@@ -174,12 +171,7 @@ class ChatGUI(Frame):
             self.box.tag_add("header", str(self.lineCounter) + "." + str(m.start(0)), str(self.lineCounter) + "." + str(m.end(0)))
             self.box.tag_config("header", font=self.customFontHeader, foreground = "blue")
         
-        #aggiungo colorazione parte di testo --> troppo complesso per ora
-        ''''m = re.search("", message)
-        lastIndex = len(m.group(0))
-        self.box.tag_add("header", m.start(), m.stop())
-        self.box.tag_config("header", foreground="green")
-        '''
+        
         self.box.config(state=DISABLED)
         #self.box.yview_scroll(10000,"units")
         self.box.see(END)
