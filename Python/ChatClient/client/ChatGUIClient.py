@@ -172,6 +172,7 @@ def main():
     root = Tk()
     root.minsize(400, 450)
     #root.geometry("400x250+450+200")
+    #root.call('wm', 'attributes', '.', '-topmost', '1')
     app = ChatGUI(root, sock)
     thread_receiver = receiveThread(1, "Receiver-Thread", sock, app)
     thread_receiver.start()

@@ -8,12 +8,13 @@ import socket
 import threading
 import time
 import traceback
+import re
 
 stopServer = False
-#connectedClients = []
+connectedClients = []
 nickList = []
-#connections = []
-#threads = []
+connections = []
+threads = []
 
 clientConnections = dict()
 
@@ -28,9 +29,6 @@ class ClientConnection:
         self.address = address
 
 def startServer(maxConnections):
-    global clientConnections
-    global nickList
-    
     serverSocket = socket.socket()
     serverSocket.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
     host = socket.gethostname()
@@ -52,9 +50,9 @@ def startServer(maxConnections):
             c.send(("Nickame " + nick +" already exists! Bye bye").encode(encoding='utf_8', errors='strict'))
             continue
         #c.close()                # Close the connection
-        #connectedClients.append(addr)
+        connectedClients.append(addr)
         nickList.append(nick)
-        #connections.append(c)
+        connections.append(c)
         cliConn = ClientConnection(c, nick, addr)
         clientConnections[addr] = cliConn
         
@@ -66,7 +64,7 @@ def startServer(maxConnections):
         
         threadCounter = threadCounter +1
         thread_x = clientThread(threadCounter, addr, nick, c)
-        #threads.append(thread_x)
+        threads.append(thread_x)
         thread_x.start()
         
 
@@ -88,9 +86,6 @@ class clientThread (threading.Thread):
         self.conn = conn
         self.nickname = nickname
     def run(self):
-        global clientConnections
-        global nickList
-        
         print("[" + time.strftime("%d-%m-%Y %H:%M:%S") + "] Starting client thread" + self.name)
         #print_time(self.name, self.counter, 5)
         try:
@@ -99,25 +94,33 @@ class clientThread (threading.Thread):
                 decodedMessage = message.decode('utf-8')
                 #print("Message to broadcast: #" + decodedMessage + "#")
                 if decodedMessage != "":
-                    #clientToRemove = []
+                    clientToRemove = []
                     for k in clientConnections.keys():
                         client = clientConnections[k]
                         send_conn = client.connection
                         try:
                             if decodedMessage == "QUIT":
-                                #send_conn.send(("[" + time.strftime("%d-%m-%Y %H:%M:%S") + "] "+self.nickname+" si \xe8 disconnesso \n").encode(encoding='utf_8', errors='strict'))
-                                pass
+                                send_conn.send(("[" + time.strftime("%d-%m-%Y %H:%M:%S") + "] "+self.nickname+" si \xe8 disconnesso \n ").encode(encoding='utf_8', errors='strict'))
                             elif decodedMessage == "HELP":
                                 send_conn.send(("[" + time.strftime("%d-%m-%Y %H:%M:%S") + "] Type QUIT to exit ").encode(encoding='utf_8', errors='strict'))
                             else:
-                                #if client.nickname != self.nickname: #FIXME: SOLO per quella testuale; per la GUI dovranno ricevere sempre tutto
-                                send_conn.send(("[" + time.strftime("%d-%m-%Y %H:%M:%S") + "] From "+self.nickname+": \n  "+decodedMessage).encode(encoding='utf_8', errors='strict'))
+                                m = re.match("^##.*##", decodedMessage)
+                                if m is not None:
+                                    currentUser = re.sub("##", "", m.group(0))
+                                    privateMessage = re.sub("##.*##", "##" + self.nickname + "##", decodedMessage) #PER ORA reinvio con la stringa speciale per PM
+                                    print("current user: "+currentUser)
+                                    print("PM: "+privateMessage)
+                                    if client.nickname == currentUser or client.nickname == self.nickname:
+                                        print("MATCH PM")
+                                        send_conn.send(("[" + time.strftime("%d-%m-%Y %H:%M:%S") + "] From "+self.nickname+": \n  "+privateMessage).encode(encoding='utf_8', errors='strict'))
+                                else:
+                                    send_conn.send(("[" + time.strftime("%d-%m-%Y %H:%M:%S") + "] From "+self.nickname+": \n  "+decodedMessage).encode(encoding='utf_8', errors='strict'))
                         except (ConnectionAbortedError,ConnectionResetError) as ex1:
                             print(traceback.format_exc())
                             #rimuovere dalla lista --> usare un dictionary
-                            #clientToRemove.append(client.address)
+                            clientToRemove.append(client.address)
                         
-                    '''for rem in clientToRemove:
+                    for rem in clientToRemove:
                         nickToRemove = clientConnections[rem].nickname
                         del clientConnections[rem]
                         nickList.remove(nickToRemove)
@@ -126,7 +129,7 @@ class clientThread (threading.Thread):
                             #print("USER LIST for a client: "+userListToString(nickList))
                             client = clientConnections[k]
                             send_conn = client.connection
-                            send_conn.send(userListToString(nickList).encode(encoding='utf_8', errors='strict'))'''
+                            send_conn.send(userListToString(nickList).encode(encoding='utf_8', errors='strict'))
                     
                     #if decodedMessage == "QUIT":
                     #    self.conn.close()
@@ -134,23 +137,7 @@ class clientThread (threading.Thread):
                     
         except (ConnectionAbortedError,ConnectionResetError) as ex2:
             print(traceback.format_exc())
-            print("[" + time.strftime("%d-%m-%Y %H:%M:%S") + "] Client " + self.name + "disconnected")
-            addr = ""
-            for k in clientConnections.keys():
-                client = clientConnections[k]
-                if client.nickname == self.nickname:
-                    addr = client.address
-                    break
-            del clientConnections[addr]
-            nickList.remove(self.nickname)
-            print("Nick connessi:")
-            print(nickList)
-            for k in clientConnections.keys():
-                client = clientConnections[k]
-                send_conn = client.connection
-                send_conn.send(("[" + time.strftime("%d-%m-%Y %H:%M:%S") + "] "+self.nickname+" si \xe8 disconnesso \n").encode(encoding='utf_8', errors='strict'))
-                send_conn.send(userListToString(nickList).encode(encoding='utf_8', errors='strict'))
-            
+            print("Client " + self.name + "disconnected")
         print("[" + time.strftime("%d-%m-%Y %H:%M:%S") + "] Exiting client thread" + self.name)
 
 def userListToString(mylist):
