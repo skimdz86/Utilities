@@ -149,7 +149,9 @@ class ChatGUI(Frame):
         self.parent.geometry('%dx%d+%d+%d' % (w, h, x, y))
      
     def gettext(self, e): #e sta per event, questo e' un listener
-        text = self.textarea.get("1.0", END + " - 2c") # 1.0: row:columa -  END-2c rimuove l'ultimo carattere, una newline \r\n
+        text = self.textarea.get("1.0", END) # 1.0: row:columa -  END-2c rimuove l'ultimo carattere, una newline \r\n
+        if "\n" in text:
+            text = text.replace("\n", "")
         self.textarea.delete("0.0", END) #NON VA: il problema e' che viene inviato il carattere di newline ma non incluso nell'area a causa della bind mi sa. Devo escluderlo io
         self.sendToServer(text)
         
