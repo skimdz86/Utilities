@@ -1,10 +1,10 @@
 ## change the image creation time (only change hours for now, so that we can manage the different timezone)
 
-if [ $# -lt 1 ]
+if [ $# -lt 2 ]
   then
     echo "No arguments supplied"
-    echo "Usage: ./file_change_date.sh <HOUR_NUMBER>"
-    echo "e.g. ./file_change_date.sh -5 or ./file_change_date.sh 7"
+    echo "Usage: ./file_change_date.sh <HOUR_NUMBER> <WORKING_DIR>"
+    echo "e.g. ./file_change_date.sh -5 /home/test or ./file_change_date.sh 7 /home/test"
     exit 1
 fi
 
@@ -21,7 +21,7 @@ fi
 
 echo "OFFSET: $direction $offset"
 
-for i in $(find . -iname "*.jpg")
+for i in $(find $2 -iname "*.jpg")
 do
   echo "$i"
   mod_date=`stat $i | grep Modif | sed 's/\.000000000.*//g' | sed 's/\(.*\)\([0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\} [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}\)/\2/g'`
