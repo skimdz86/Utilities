@@ -4,7 +4,7 @@
 if [ $# -lt 1 ]
   then
     echo "No arguments supplied"
-    echo "Usage: ./Rename_files_ordered_by_date.sh <WORKING_DIR> <FILE_PREFIX (optional)>"
+    echo "Usage: ./Rename_files_ordered_by_date.sh <WORKING_DIR_WITHOUT_SLASH> <FILE_PREFIX (optional)>"
     echo "e.g. ./Rename_files_ordered_by_date.sh /home/test myfile_ or ./Rename_files_ordered_by_date.sh /home/test"
     exit 1
 fi
@@ -23,8 +23,8 @@ echo "Directory: $1"
 export counter=1
 for i in $(ls -tr $1)
 do 
-  echo $i
+  echo "$1/$i"
   echo $counter
-  mv $i "$PREFIX_$counter.jpg"
+  mv $1/$i "$1/$PREFIX_$counter.jpg"
   let counter=$counter+1
 done
