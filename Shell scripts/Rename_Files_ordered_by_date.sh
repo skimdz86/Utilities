@@ -25,6 +25,6 @@ for i in $(ls -tr $1)
 do 
   echo "$1/$i"
   echo $counter
-  mv $1/$i "$1/$PREFIX_$counter.jpg"
+  mv $1/$i "$1/$PREFIX-$counter.jpg"
   let counter=$counter+1
 done
