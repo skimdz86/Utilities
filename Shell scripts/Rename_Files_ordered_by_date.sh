@@ -17,6 +17,8 @@ else
   PREFIX=$2
 fi
 
+IFS=$'\n'
+
 echo "FIle Prefix: $PREFIX"
 echo "Directory: $1"
 
