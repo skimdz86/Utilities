@@ -22,11 +22,14 @@ IFS=$'\n'
 echo "FIle Prefix: $PREFIX"
 echo "Directory: $1"
 
+totalNumber=`ls -tr $1|wc -l`
+
 export counter=1
 for i in $(ls -tr $1)
 do 
   echo "$1/$i"
   echo $counter
-  mv $1/$i "$1/$PREFIX-$counter.jpg"
+  padded_counter=`seq -w $counter $totalNumber $totalNumber`
+  mv $1/$i "$1/$PREFIX-$padded_counter.jpg"
   let counter=$counter+1
 done
